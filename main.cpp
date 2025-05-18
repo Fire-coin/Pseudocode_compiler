@@ -8,6 +8,7 @@
 #include <stdlib.h> // for std::system
 #include <exception> // for std::exception
 #include <stdexcept> // for std::invalid_argument
+#include <unordered_set>
 // Globals
 std::string outputFile = "output.cpp";
 std::unordered_map<std::string, std::string> dataTypes = {{"INTEGER", "int"}, {"REAL", "double"},
@@ -15,6 +16,7 @@ std::unordered_map<std::string, std::string> dataTypes = {{"INTEGER", "int"}, {"
                                                     {"BOOLEAN", "bool"}};
 
 std::unordered_map<std::string, int> keywords = {{"DECLARE", 0}};
+std::unordered_set<std::string> variableNames;
 bool validCode = true;
 
 // Internally used functions
@@ -28,7 +30,9 @@ void logError(unsigned int, std::string, const std::exception&);
 
 // Functions for translation
 bool handleDeclare(std::string line);
+bool handleInitializing(std::string line);
 
+// Exceptions
 class data_type_exception : public std::exception {
     private:
         std::string message;
@@ -107,6 +111,7 @@ int main() {
                         std::cerr << "Invalid keyword: " << *position << ':' 
                         << keywords[*position] << '\n';
                 }
+                break; // TODO if multiline expressions are allowed it need flag variable
             }
         }
     }
@@ -179,6 +184,7 @@ std::string join(std::vector<std::string>::iterator start, std::vector<std::stri
 
 
 bool validName(std::string name) {
+    if (keywords.find(name) != keywords.end()) return false;
     // Returns false if first character of name is not a letter
     if ((name[0] > 90 || name[0] < 65) && (name[0] > 122 || name[0] < 97)) return false;
 
@@ -224,4 +230,15 @@ bool handleDeclare(std::string line) {
     writeToFile(message);
 
     return true;
+}
+
+
+bool handleInitializing(std::string line) {
+    //TODO create split function that takes sting as delimiter
+    //TODO create handleExpression function to handle possible expressions
+    //TODO add checks for 2 arguments only after spliting by <-,
+    // check is variable name is already declared,
+    // TODO implement data type checking inside of handleExpression; priority = low
+    
+    // std::vector<std::string> args = split(line, "<-");
 }
