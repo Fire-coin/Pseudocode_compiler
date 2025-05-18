@@ -1,5 +1,0 @@
-INTEGER:int
-REAL:double
-CHAR:char
-STRING:string
-BOOLEAN:bool
