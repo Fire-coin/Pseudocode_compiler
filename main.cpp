@@ -20,6 +20,7 @@ std::vector<std::string> split(std::string line, char delimiter);
 std::string join(std::vector<std::string> args);
 std::string join(std::vector<std::string>::iterator start, std::vector<std::string>::iterator end);
 void writeToFile(std::string message);
+bool validName(std::string);
 
 // Functions for translation
 bool handleDeclare(std::string line);
@@ -30,6 +31,17 @@ class data_type_exception : public std::exception {
     
     public:
         data_type_exception(const char * msg) : message(msg) {};
+        const char * what() {
+            return message;
+        }
+};
+
+class invalid_identifier_name : public std::exception {
+    private:
+        const char* message;
+    
+    public:
+        invalid_identifier_name(const char * msg) : message(msg) {};
         const char * what() {
             return message;
         }
@@ -60,6 +72,9 @@ int main() {
 
     // Adding headers to the output file
     writeToFile("#include <iostream>");
+    writeToFile("#include <string>");
+
+    writeToFile("using namespace std;");
 
     // Beggining of main function in output file
     writeToFile("int main() {");
@@ -148,22 +163,44 @@ std::string join(std::vector<std::string>::iterator start, std::vector<std::stri
 }
 
 
+bool validName(std::string name) {
+    // Returns false if first character of name is not a letter
+    if ((name[0] > 90 || name[0] < 65) && (name[0] > 122 || name[0] < 97)) return false;
+
+    for (int i = 0; i < name.length(); ++i) {
+        if ((name[i] >= 97 && name[i] <= 122) || // Checks if character is lower case letter
+            (name[i] >= 65 && name[i] <= 90) || // Checks if character is upper case letter
+            (name[i] >= 48 && name[i] <= 57) || // Checks if character is numeric
+            (name[i] == 95)) { // Checks if character is underscore
+            continue;
+        } else return false;
+    }
+    return true;
+}
+
+
+
+
 // This function supports only single declaration on each line.
 bool handleDeclare(std::string line) {
     std::vector<std::string> args = split(line, ':');
     std::string message;
-    std::cout << line << '\n';
-    if (args.size() != 2) {
-        throw std::invalid_argument("There should be 2 argumenst for declaration; <identifier> : <data_type>");
+    if (args.size() != 2) { // Checks if exactly 2 arguments were supplied for declaration
+        message = "There should be 2 arguments for declaration; <identifier> : <data_type>; however " + std::to_string(args.size()) + " were given";
+        throw std::invalid_argument(message);
     }
-    if (dataTypes.find(args[1]) != dataTypes.end()) {
-        //TODO Add checking for valid <identifier>
-        message += dataTypes[args[1]] + ' '; // Adding <data_type> of variable to the message
-        message += args[0] + ';'; // Addings <identifier> to the message
-        writeToFile(message);
-    } else {
-        throw data_type_exception("Invalid data type");
+    if (dataTypes.find(args[1]) == dataTypes.end()) { // Checks if data type is valid
+        message = "Invalid data type: " + args[1];
+        throw data_type_exception(message.c_str());
     }
+    if (!validName(args[0])) { // Checks if <identifier> name is valid
+        message = "Invalid identifier name: " + args[0];
+        throw invalid_identifier_name(message.c_str());
+    }
+
+    message += dataTypes[args[1]] + ' '; // Adding <data_type> of variable to the message
+    message += args[0] + ';'; // Addings <identifier> to the message
+    writeToFile(message);
 
     return true;
 }
