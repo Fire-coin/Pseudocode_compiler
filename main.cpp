@@ -5,19 +5,24 @@
 #include <vector>
 #include <utility> // for std::pair
 #include <unordered_map>
-
-
-bool loadKeywords(std::string filename);
-
-std::vector<std::string> split(std::string line, char delimiter);
-bool handleDeclare(std::string line);
-std::string join(std::vector<std::string> args);
-
+// Globals
+std::string outputFile = "output.cpp";
 std::pair<std::string, std::string> dataTypes[5] = {{"INTEGER", "int"}, {"REAL", "double"},
                                                     {"CHAR", "char"}, {"STRING", "string"},
                                                     {"BOOLEAN", "bool"}};
 
 std::unordered_map<std::string, int> keywords = {{"DECLARE", 0}};
+
+// Internally used functions
+bool loadKeywords(std::string filename);
+std::vector<std::string> split(std::string line, char delimiter);
+std::string join(std::vector<std::string> args);
+void writeToFile(std::string message);
+
+// Functions for translation
+bool handleDeclare(std::string line);
+
+
 
 int main() {
     // Loading kaywords from a file
@@ -28,7 +33,6 @@ int main() {
     }
 
     std::string inputFile;
-    std::string outputFile = "output.cpp";
     std::cout << "Enter filename: ";
     std::getline(std::cin, inputFile);
 
@@ -45,10 +49,10 @@ int main() {
         for (auto i : args) {
             std::cout << i << ',';
         }
-        // std::cout << join(args) << '\n';
+        writeToFile(join(args) + "sjh\n");
         std::cout << '\n';
     }
-
+    fin.close();
     return 0;
 }
 
@@ -80,6 +84,17 @@ std::vector<std::string> split(std::string line, char delimiter) {
 }
 
 
+void writeToFile(std::string message) {
+    std::ofstream fon;
+    fon.open(outputFile, std::ios::app);
+    if (fon.is_open()) {
+        fon << message << '\n';
+    }
+    fon.close();
+}
+
+
+
 std::string join(std::vector<std::string> args) {
     std::string output;
     for (std::string s : args) {
@@ -95,7 +110,7 @@ bool handleDeclare(std::string line) {
     if (args.size() != 2) {
         throw std::invalid_argument("There should be 2 argumenst for declaration; <identifier> : <data_type>");
     }
-    
+
 
     return true;
 }
