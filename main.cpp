@@ -6,6 +6,8 @@
 #include <utility> // for std::pair
 #include <unordered_map>
 #include <stdlib.h> // for std::system
+#include <exception> // for std::exception
+#include <stdexcept> // for std::invalid_argument
 // Globals
 std::string outputFile = "output.cpp";
 std::unordered_map<std::string, std::string> dataTypes = {{"INTEGER", "int"}, {"REAL", "double"},
@@ -13,6 +15,7 @@ std::unordered_map<std::string, std::string> dataTypes = {{"INTEGER", "int"}, {"
                                                     {"BOOLEAN", "bool"}};
 
 std::unordered_map<std::string, int> keywords = {{"DECLARE", 0}};
+bool validCode = true;
 
 // Internally used functions
 bool loadKeywords(std::string filename);
@@ -21,29 +24,30 @@ std::string join(std::vector<std::string> args);
 std::string join(std::vector<std::string>::iterator start, std::vector<std::string>::iterator end);
 void writeToFile(std::string message);
 bool validName(std::string);
+void logError(unsigned int, std::string, const std::exception&);
 
 // Functions for translation
 bool handleDeclare(std::string line);
 
 class data_type_exception : public std::exception {
     private:
-        const char* message;
+        std::string message;
     
     public:
         data_type_exception(const char * msg) : message(msg) {};
-        const char * what() {
-            return message;
+        const char * what() const noexcept override {
+            return message.c_str();
         }
 };
 
 class invalid_identifier_name : public std::exception {
     private:
-        const char* message;
+        std::string message;
     
     public:
         invalid_identifier_name(const char * msg) : message(msg) {};
-        const char * what() {
-            return message;
+        const char * what() const noexcept override {
+            return message.c_str();
         }
 };
 
@@ -81,13 +85,23 @@ int main() {
 
     std::string line;
     std::vector<std::string> args;
+    unsigned int lineNum = 0;
     while (std::getline(fin, line, '\n')) {
+        lineNum++;
         args = split(line, ' ');
         for (auto position = args.begin(); position != args.end(); ++position) {
             if (keywords.find(*position) != keywords.end()) {
                 switch (keywords[*position]) {
                     case 0: // DECLARE
-                        handleDeclare(join(args.begin() + 1, args.end()));
+                        try {
+                            handleDeclare(join(args.begin() + 1, args.end()));
+                        } catch (const std::invalid_argument& e) {
+                            logError(lineNum, line, e);
+                        } catch (const data_type_exception& e) {
+                            logError(lineNum, line, e);
+                        } catch (const invalid_identifier_name& e) {
+                            logError(lineNum, line, e);
+                        }
                         break;
                     default:
                         std::cerr << "Invalid keyword: " << *position << ':' 
@@ -101,8 +115,10 @@ int main() {
     // closing main function in output file
     writeToFile("}");
     // compiling the output file
-    std::string command = "g++ -o" + outputFile.substr(0, outputFile.size() - 3) + ".exe " + outputFile;
-    std::system(command.c_str());
+    if (validCode) {
+        std::string command = "g++ -o" + outputFile.substr(0, outputFile.size() - 3) + ".exe " + outputFile;
+        std::system(command.c_str());
+    }
     return 0;
 }
 
@@ -144,7 +160,6 @@ void writeToFile(std::string message) {
 }
 
 
-
 std::string join(std::vector<std::string> args) {
     std::string output;
     for (std::string s : args) {
@@ -179,6 +194,12 @@ bool validName(std::string name) {
 }
 
 
+void logError(unsigned int lineNum, std::string line, const std::exception& e) {
+    std::cout << "Error: " << e.what();
+    std::cout << "\t" << lineNum << " |\t" << line << '\n';
+    validCode = false;
+}
+
 
 
 // This function supports only single declaration on each line.
@@ -186,15 +207,15 @@ bool handleDeclare(std::string line) {
     std::vector<std::string> args = split(line, ':');
     std::string message;
     if (args.size() != 2) { // Checks if exactly 2 arguments were supplied for declaration
-        message = "There should be 2 arguments for declaration; <identifier> : <data_type>; however " + std::to_string(args.size()) + " were given";
+        message = "There should be 2 arguments for declaration; <identifier> : <data_type>; however " + std::to_string(args.size()) + " were given" + '\n';
         throw std::invalid_argument(message);
     }
     if (dataTypes.find(args[1]) == dataTypes.end()) { // Checks if data type is valid
-        message = "Invalid data type: " + args[1];
+        message = "Invalid data type: " + args[1] + '\n';
         throw data_type_exception(message.c_str());
     }
     if (!validName(args[0])) { // Checks if <identifier> name is valid
-        message = "Invalid identifier name: " + args[0];
+        message = "Invalid identifier name: " + args[0] + '\n';
         throw invalid_identifier_name(message.c_str());
     }
 
