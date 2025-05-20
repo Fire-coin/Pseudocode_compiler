@@ -22,6 +22,7 @@ bool validCode = true;
 // Internally used functions
 bool loadKeywords(std::string filename);
 std::vector<std::string> split(std::string line, char delimiter);
+std::vector<std::string> split(std::string line, std::string delimiter);
 std::string join(std::vector<std::string> args);
 std::string join(std::vector<std::string>::iterator start, std::vector<std::string>::iterator end);
 void writeToFile(std::string message);
@@ -107,6 +108,9 @@ int main() {
                             logError(lineNum, line, e);
                         }
                         break;
+                    case 1: // <- (assignment operator)
+                        
+                            break;
                     default:
                         std::cerr << "Invalid keyword: " << *position << ':' 
                         << keywords[*position] << '\n';
@@ -151,6 +155,24 @@ std::vector<std::string> split(std::string line, char delimiter) {
         output.push_back(buffer);
     }
 
+    return output;
+}
+
+
+std::vector<std::string> split(std::string line, std::string delimiter) {
+    std::vector<std::string> output;
+    int length = delimiter.length();
+    int current = 0;
+    int start = 0;
+    while (current < line.length() - length) {
+        if (line.substr(current, length) == delimiter) {
+            output.push_back(line.substr(start, current - start));
+            start = current + length;
+            current++;
+        }
+        current++;
+    }
+    output.push_back(line.substr(start, line.length() - start));
     return output;
 }
 
@@ -241,4 +263,5 @@ bool handleInitializing(std::string line) {
     // TODO implement data type checking inside of handleExpression; priority = low
     
     // std::vector<std::string> args = split(line, "<-");
+    return true;
 }
