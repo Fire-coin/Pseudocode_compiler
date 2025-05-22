@@ -1,14 +1,13 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <sstream>
 #include <vector>
-#include <utility> // for std::pair
 #include <unordered_map>
 #include <stdlib.h> // for std::system
 #include <exception> // for std::exception
 #include <stdexcept> // for std::invalid_argument
 #include <unordered_set>
+#include "internal.hpp"
 // Globals
 std::string outputFile = "output.cpp";
 std::unordered_map<std::string, std::string> dataTypes = {{"INTEGER", "int"}, {"REAL", "double"},
@@ -19,15 +18,7 @@ std::unordered_map<std::string, int> keywords = {{"DECLARE", 0}};
 std::unordered_set<std::string> variableNames;
 bool validCode = true;
 
-// Internally used functions
-bool loadKeywords(std::string filename);
-std::vector<std::string> split(std::string line, char delimiter);
-std::vector<std::string> split(std::string line, std::string delimiter);
-std::string join(std::vector<std::string> args);
-std::string join(std::vector<std::string>::iterator start, std::vector<std::string>::iterator end);
-void writeToFile(std::string message);
-bool validName(std::string);
-void logError(unsigned int, std::string, const std::exception&);
+bool handleExpression(const std::string& line);
 
 // Functions for translation
 bool handleDeclare(std::string line);
@@ -58,7 +49,7 @@ class invalid_identifier_name : public std::exception {
 
 int main() {
     // Loading keywords from a file
-    bool success = loadKeywords("keywords.txt");
+    bool success = loadKeywords("keywords.txt", keywords);
     if (!success) {
         std::cerr << "Could not load keywords.\n";
         return 0;
@@ -80,13 +71,13 @@ int main() {
     fon.close();
 
     // Adding headers to the output file
-    writeToFile("#include <iostream>");
-    writeToFile("#include <string>");
+    writeToFile("#include <iostream>", outputFile);
+    writeToFile("#include <string>", outputFile);
 
-    writeToFile("using namespace std;");
+    writeToFile("using namespace std;", outputFile);
 
     // Beggining of main function in output file
-    writeToFile("int main() {");
+    writeToFile("int main() {", outputFile);
 
     std::string line;
     std::vector<std::string> args;
@@ -101,16 +92,16 @@ int main() {
                         try {
                             handleDeclare(join(args.begin() + 1, args.end()));
                         } catch (const std::invalid_argument& e) {
-                            logError(lineNum, line, e);
+                            logError(lineNum, line, e, validCode);
                         } catch (const data_type_exception& e) {
-                            logError(lineNum, line, e);
+                            logError(lineNum, line, e, validCode);
                         } catch (const invalid_identifier_name& e) {
-                            logError(lineNum, line, e);
+                            logError(lineNum, line, e, validCode);
                         }
                         break;
                     case 1: // <- (assignment operator)
-                        
-                            break;
+                        handleInitializing(join(args.begin(), args.end()));
+                        break;
                     default:
                         std::cerr << "Invalid keyword: " << *position << ':' 
                         << keywords[*position] << '\n';
@@ -122,7 +113,7 @@ int main() {
     fin.close();
 
     // closing main function in output file
-    writeToFile("}");
+    writeToFile("}", outputFile);
     // compiling the output file
     if (validCode) {
         std::string command = "g++ -o" + outputFile.substr(0, outputFile.size() - 3) + ".exe " + outputFile;
@@ -130,104 +121,6 @@ int main() {
     }
     return 0;
 }
-
-
-bool loadKeywords(std::string filename) {
-    std::ifstream fin(filename);
-    if (!fin.is_open()) {
-        return false;
-    }
-    std::string buffer;
-    std::vector<std::string> pairs;
-    while (std::getline(fin, buffer, '\n')) {
-        pairs = split(buffer, ':');
-        keywords[pairs[0]] = stoi(pairs[1]);
-    }
-    return true;
-}
-
-
-std::vector<std::string> split(std::string line, char delimiter) {
-    std::vector<std::string> output;
-    std::string buffer;
-    std::stringstream ss(line);
-    while (std::getline(ss, buffer, delimiter)) {
-        output.push_back(buffer);
-    }
-
-    return output;
-}
-
-
-std::vector<std::string> split(std::string line, std::string delimiter) {
-    std::vector<std::string> output;
-    int length = delimiter.length();
-    int current = 0;
-    int start = 0;
-    while (current < line.length() - length) {
-        if (line.substr(current, length) == delimiter) {
-            output.push_back(line.substr(start, current - start));
-            start = current + length;
-            current++;
-        }
-        current++;
-    }
-    output.push_back(line.substr(start, line.length() - start));
-    return output;
-}
-
-
-void writeToFile(std::string message) {
-    std::ofstream fon;
-    fon.open(outputFile, std::ios::app);
-    if (fon.is_open()) {
-        fon << message << '\n';
-    }
-    fon.close();
-}
-
-
-std::string join(std::vector<std::string> args) {
-    std::string output;
-    for (std::string s : args) {
-        output += s;
-    }
-    return output;
-}
-
-
-std::string join(std::vector<std::string>::iterator start, std::vector<std::string>::iterator end) {
-    std::string output;
-    for (auto position = start; position != end; ++position) {
-        output += *position;
-    }
-    return output;
-}
-
-
-bool validName(std::string name) {
-    if (keywords.find(name) != keywords.end()) return false;
-    // Returns false if first character of name is not a letter
-    if ((name[0] > 90 || name[0] < 65) && (name[0] > 122 || name[0] < 97)) return false;
-
-    for (int i = 0; i < name.length(); ++i) {
-        if ((name[i] >= 97 && name[i] <= 122) || // Checks if character is lower case letter
-            (name[i] >= 65 && name[i] <= 90) || // Checks if character is upper case letter
-            (name[i] >= 48 && name[i] <= 57) || // Checks if character is numeric
-            (name[i] == 95)) { // Checks if character is underscore
-            continue;
-        } else return false;
-    }
-    return true;
-}
-
-
-void logError(unsigned int lineNum, std::string line, const std::exception& e) {
-    std::cout << "Error: " << e.what();
-    std::cout << "\t" << lineNum << " |\t" << line << '\n';
-    validCode = false;
-}
-
 
 
 // This function supports only single declaration on each line.
@@ -242,23 +135,52 @@ bool handleDeclare(std::string line) {
         message = "Invalid data type: " + args[1] + '\n';
         throw data_type_exception(message.c_str());
     }
-    if (!validName(args[0])) { // Checks if <identifier> name is valid
+    if (!validName(args[0], keywords)) { // Checks if <identifier> name is valid
         message = "Invalid identifier name: " + args[0] + '\n';
         throw invalid_identifier_name(message.c_str());
     }
 
     message += dataTypes[args[1]] + ' '; // Adding <data_type> of variable to the message
     message += args[0] + ';'; // Addings <identifier> to the message
-    writeToFile(message);
+    variableNames.insert(args[0]); // Adding variable into list of existing variables
+    //TODO make splited variable sets for local function variables; priority = low
+    writeToFile(message, outputFile);
+
+    return true;
+}
+
+
+bool handleExpression(const std::string& line) {
+    //TODO add bracket checks and impement function
+    // that returns which type of char was previously.
+    // And make checks so no 2 operators will be after each other
+    std::string varName = "";
+
+    for (const char& i : line) {
+        if ((i >= 97 && i <= 122) || // Checks if character is lower case letter
+            (i >= 65 && i <= 90)) { // Checks if character is upper case letter
+
+        } 
+    }
 
     return true;
 }
 
 
 bool handleInitializing(std::string line) {
-    //TODO create split function that takes sting as delimiter
+    std::vector<std::string> args = split(line, "<-");
+    std::string message;
+    if (args.size() == 1) {
+        message = "Expected <expression> or <identifier> after <-\n";
+        throw std::invalid_argument(message);
+    }
+    if (args.size() != 2) {
+        message = "Multiple <- (assighments) not supported on one line\n";
+        throw std::invalid_argument(message);
+    }
+
+
     //TODO create handleExpression function to handle possible expressions
-    //TODO add checks for 2 arguments only after spliting by <-,
     // check is variable name is already declared,
     // TODO implement data type checking inside of handleExpression; priority = low
     
