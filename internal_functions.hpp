@@ -1,3 +1,6 @@
+#ifndef INTERNAL_FUNCTIONS_HPP
+#define INTERNAL_FUNCTIONS_HPP
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -10,14 +13,22 @@ using std::string, std::vector, std::stringstream,
       std::getline, std::unordered_map, std::exception,
       std::ifstream, std::ofstream, std::cout;
 
+
+enum class characters {
+    lower, upper, number, underscore, op, bracket
+};
+
 bool loadKeywords(const string& filename, unordered_map<string, int>& keywords);
 vector<string> split(const string& line, char delimiter);
 vector<string> split(const string& line, const string& delimiter);
 string join(const vector<string>& args);
 string join(const vector<string>::iterator& start, const vector<string>::iterator& end);
 void writeToFile(const string& message, const string& outputFile);
-bool validName(const string& name, unordered_map<string, int>& keywords);
+bool validName(const string& name, const unordered_map<string, int>& keywords);
 void logError(const unsigned int lineNum, const string& line, const exception& e, bool& validCode);
+bool handleExpression(const string& line);
+
+
 
 bool loadKeywords(const string& filename, unordered_map<string, int>& keywords) {
     ifstream fin(filename);
@@ -86,7 +97,7 @@ void writeToFile(const string& message, const string& outputFile) {
     fon.close();
 }
 
-bool validName(const string& name, unordered_map<string, int>& keywords) {
+bool validName(const string& name, const unordered_map<string, int>& keywords) {
     if (keywords.find(name) != keywords.end()) return false;
     // Returns false if first character of name is not a letter
     if ((name[0] > 90 || name[0] < 65) && (name[0] > 122 || name[0] < 97)) return false;
@@ -107,3 +118,23 @@ void logError(const unsigned int lineNum, const string& line, const exception& e
     cout << "\t" << lineNum << " |\t" << line << '\n';
     validCode = false;
 }
+
+
+bool handleExpression(const string& line) {
+    //TODO add bracket checks and impement function
+    // that returns which type of char was previously.
+    // And make checks so no 2 operators will be after each other
+    string varName = "";
+
+    for (const char& i : line) {
+        if ((i >= 97 && i <= 122) || // Checks if character is lower case letter
+            (i >= 65 && i <= 90)) { // Checks if character is upper case letter
+
+        } 
+    }
+
+    return true;
+}
+
+#endif
+#pragma once

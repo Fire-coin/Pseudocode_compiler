@@ -7,7 +7,9 @@
 #include <exception> // for std::exception
 #include <stdexcept> // for std::invalid_argument
 #include <unordered_set>
-#include "internal.hpp"
+#include "internal_functions.hpp"
+#include "handling_functions.hpp"
+#include "custom_exceptions.hpp"
 // Globals
 std::string outputFile = "output.cpp";
 std::unordered_map<std::string, std::string> dataTypes = {{"INTEGER", "int"}, {"REAL", "double"},
@@ -18,34 +20,6 @@ std::unordered_map<std::string, int> keywords = {{"DECLARE", 0}};
 std::unordered_set<std::string> variableNames;
 bool validCode = true;
 
-bool handleExpression(const std::string& line);
-
-// Functions for translation
-bool handleDeclare(std::string line);
-bool handleInitializing(std::string line);
-
-// Exceptions
-class data_type_exception : public std::exception {
-    private:
-        std::string message;
-    
-    public:
-        data_type_exception(const char * msg) : message(msg) {};
-        const char * what() const noexcept override {
-            return message.c_str();
-        }
-};
-
-class invalid_identifier_name : public std::exception {
-    private:
-        std::string message;
-    
-    public:
-        invalid_identifier_name(const char * msg) : message(msg) {};
-        const char * what() const noexcept override {
-            return message.c_str();
-        }
-};
 
 int main() {
     // Loading keywords from a file
@@ -90,7 +64,8 @@ int main() {
                 switch (keywords[*position]) {
                     case 0: // DECLARE
                         try {
-                            handleDeclare(join(args.begin() + 1, args.end()));
+                            handleDeclare(join(args.begin() + 1, args.end()), 
+                                          dataTypes, keywords, variableNames, outputFile);
                         } catch (const std::invalid_argument& e) {
                             logError(lineNum, line, e, validCode);
                         } catch (const data_type_exception& e) {
@@ -120,70 +95,4 @@ int main() {
         std::system(command.c_str());
     }
     return 0;
-}
-
-
-// This function supports only single declaration on each line.
-bool handleDeclare(std::string line) {
-    std::vector<std::string> args = split(line, ':');
-    std::string message;
-    if (args.size() != 2) { // Checks if exactly 2 arguments were supplied for declaration
-        message = "There should be 2 arguments for declaration; <identifier> : <data_type>; however " + std::to_string(args.size()) + " were given" + '\n';
-        throw std::invalid_argument(message);
-    }
-    if (dataTypes.find(args[1]) == dataTypes.end()) { // Checks if data type is valid
-        message = "Invalid data type: " + args[1] + '\n';
-        throw data_type_exception(message.c_str());
-    }
-    if (!validName(args[0], keywords)) { // Checks if <identifier> name is valid
-        message = "Invalid identifier name: " + args[0] + '\n';
-        throw invalid_identifier_name(message.c_str());
-    }
-
-    message += dataTypes[args[1]] + ' '; // Adding <data_type> of variable to the message
-    message += args[0] + ';'; // Addings <identifier> to the message
-    variableNames.insert(args[0]); // Adding variable into list of existing variables
-    //TODO make splited variable sets for local function variables; priority = low
-    writeToFile(message, outputFile);
-
-    return true;
-}
-
-
-bool handleExpression(const std::string& line) {
-    //TODO add bracket checks and impement function
-    // that returns which type of char was previously.
-    // And make checks so no 2 operators will be after each other
-    std::string varName = "";
-
-    for (const char& i : line) {
-        if ((i >= 97 && i <= 122) || // Checks if character is lower case letter
-            (i >= 65 && i <= 90)) { // Checks if character is upper case letter
-
-        } 
-    }
-
-    return true;
-}
-
-
-bool handleInitializing(std::string line) {
-    std::vector<std::string> args = split(line, "<-");
-    std::string message;
-    if (args.size() == 1) {
-        message = "Expected <expression> or <identifier> after <-\n";
-        throw std::invalid_argument(message);
-    }
-    if (args.size() != 2) {
-        message = "Multiple <- (assighments) not supported on one line\n";
-        throw std::invalid_argument(message);
-    }
-
-
-    //TODO create handleExpression function to handle possible expressions
-    // check is variable name is already declared,
-    // TODO implement data type checking inside of handleExpression; priority = low
-    
-    // std::vector<std::string> args = split(line, "<-");
-    return true;
 }
