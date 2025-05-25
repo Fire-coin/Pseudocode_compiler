@@ -100,13 +100,13 @@ void writeToFile(const string& message, const string& outputFile) {
 bool validName(const string& name, const unordered_map<string, int>& keywords) {
     if (keywords.find(name) != keywords.end()) return false;
     // Returns false if first character of name is not a letter
-    if ((name[0] > 90 || name[0] < 65) && (name[0] > 122 || name[0] < 97)) return false;
+    if ((name[0] > 'Z' || name[0] < 'A') && (name[0] > 'z' || name[0] < 'a')) return false;
 
     for (int i = 0; i < name.length(); ++i) {
-        if ((name[i] >= 97 && name[i] <= 122) || // Checks if character is lower case letter
-            (name[i] >= 65 && name[i] <= 90) || // Checks if character is upper case letter
-            (name[i] >= 48 && name[i] <= 57) || // Checks if character is numeric
-            (name[i] == 95)) { // Checks if character is underscore
+        if ((name[i] >= 'a' && name[i] <= 'z') || // Checks if character is lower case letter
+            (name[i] >= 'A' && name[i] <= 'Z') || // Checks if character is upper case letter
+            (name[i] >= '0' && name[i] <= '9') || // Checks if character is numeric
+            (name[i] == '_')) { // Checks if character is underscore
             continue;
         } else return false;
     }
@@ -125,12 +125,11 @@ bool handleExpression(const string& line) {
     // that returns which type of char was previously.
     // And make checks so no 2 operators will be after each other
     string varName = "";
-
     for (const char& i : line) {
-        if ((i >= 97 && i <= 122) || // Checks if character is lower case letter
-            (i >= 65 && i <= 90)) { // Checks if character is upper case letter
+        if ((i >= 'a' && i <= 'z') || // Checks if character is lower case letter
+            (i >= 'A' && i <= 'Z')) { // Checks if character is upper case letter
 
-        } 
+        }
     }
 
     return true;
