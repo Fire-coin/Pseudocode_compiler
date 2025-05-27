@@ -19,3 +19,4 @@ loUko90_ <- FALSE
 abc <- abc
 abc <- c
 abc <- c + 'k'
+weight <- weight + count

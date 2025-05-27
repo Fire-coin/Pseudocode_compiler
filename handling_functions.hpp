@@ -174,13 +174,24 @@ dataTypes handleExpression(const string& line, const unordered_map<string, dataT
                             message = "Impossible data type\n";
                             throw data_type_exception(message.c_str());
                     }
+                } else {
+                    switch (currentDataType) {
+                        case dataTypes::EMPTY:
+                            currentDataType = dataTypes::INTEGER;
+                            break;
+                        case dataTypes::INTEGER:
+                            break;
+                        case dataTypes::REAL:
+                            currentDataType = dataTypes::REAL;
+                            break;
+                        default:
+                            return dataTypes::INVALID;
+                    }
                 }
-
             }
         }
     }
-
-    return currentDataType; // Currently not functioning data type detection
+    return currentDataType;
 }
 
 
