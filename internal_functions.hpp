@@ -14,8 +14,8 @@ using std::string, std::vector, std::stringstream,
       std::ifstream, std::ofstream, std::cout;
 
 
-enum class characters {
-    lower, upper, number, underscore, op, bracket
+enum class dataTypes {
+    INTEGER, REAL, CHAR, STRING, BOOLEAN, INVALID
 };
 
 bool loadKeywords(const string& filename, unordered_map<string, int>& keywords);
@@ -26,7 +26,6 @@ string join(const vector<string>::iterator& start, const vector<string>::iterato
 void writeToFile(const string& message, const string& outputFile);
 bool validName(const string& name, const unordered_map<string, int>& keywords);
 void logError(const unsigned int lineNum, const string& line, const exception& e, bool& validCode);
-bool handleExpression(const string& line);
 
 
 
@@ -119,21 +118,6 @@ void logError(const unsigned int lineNum, const string& line, const exception& e
     validCode = false;
 }
 
-
-bool handleExpression(const string& line) {
-    //TODO add bracket checks and impement function
-    // that returns which type of char was previously.
-    // And make checks so no 2 operators will be after each other
-    string varName = "";
-    for (const char& i : line) {
-        if ((i >= 'a' && i <= 'z') || // Checks if character is lower case letter
-            (i >= 'A' && i <= 'Z')) { // Checks if character is upper case letter
-
-        }
-    }
-
-    return true;
-}
 
 #endif
 #pragma once
