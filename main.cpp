@@ -12,12 +12,12 @@
 #include "custom_exceptions.hpp"
 // Globals
 std::string outputFile = "output.cpp";
-std::unordered_map<std::string, std::string> dataTypes = {{"INTEGER", "int"}, {"REAL", "double"},
+std::unordered_map<std::string, std::string> dataTypesMap = {{"INTEGER", "int"}, {"REAL", "double"},
                                                     {"CHAR", "char"}, {"STRING", "string"},
                                                     {"BOOLEAN", "bool"}};
 
 std::unordered_map<std::string, int> keywords = {{"DECLARE", 0}};
-std::unordered_set<std::string> variableNames;
+std::unordered_map<std::string, dataTypes> variables;
 bool validCode = true;
 
 
@@ -53,9 +53,9 @@ int main() {
     // Beggining of main function in output file
     writeToFile("int main() {", outputFile);
 
-    std::string line;
+    std::string line; // Current line being processed
     std::vector<std::string> args;
-    unsigned int lineNum = 0;
+    unsigned int lineNum = 0; // Number of current line bding processed
     while (std::getline(fin, line, '\n')) {
         lineNum++;
         args = split(line, ' ');
@@ -65,7 +65,7 @@ int main() {
                     case 0: // DECLARE
                         try {
                             handleDeclare(join(args.begin() + 1, args.end()), 
-                                          dataTypes, keywords, variableNames, outputFile);
+                                          dataTypesMap, keywords, variables, outputFile);
                         } catch (const std::invalid_argument& e) {
                             logError(lineNum, line, e, validCode);
                         } catch (const data_type_exception& e) {
@@ -75,7 +75,13 @@ int main() {
                         }
                         break;
                     case 1: // <- (assignment operator)
-                        handleInitializing(join(args.begin(), args.end()));
+                        try{
+                            handleInitializing(join(args.begin(), args.end()), variables);
+                        } catch (const std::invalid_argument& e) {
+                            logError(lineNum, line, e, validCode);
+                        } catch (const quote_not_closed& e) {
+                            logError(lineNum, line, e, validCode);
+                        }
                         break;
                     default:
                         std::cerr << "Invalid keyword: " << *position << ':' 
@@ -85,7 +91,6 @@ int main() {
             }
         }
     }
-    fin.close();
 
     // closing main function in output file
     writeToFile("}", outputFile);
