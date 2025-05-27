@@ -76,9 +76,10 @@ dataTypes handleExpression(const string& line, const unordered_map<string, dataT
     }
 
     args = split(pureLine, ' ');
-    dataTypes currentDataType = dataTypes::INVALID;
+    dataTypes currentDataType = dataTypes::EMPTY;
     for (const string& str : args) {
         // Checks if currently processed token is string literal
+        //TODO fix not tracking if string was only closed but never opened
         if (str.find('\"') == 0) { // If token beggins by double quote
             //TODO add test if double quote is inside of single quotes
             // Checks if token is both beggining and ending by double quote
@@ -86,30 +87,47 @@ dataTypes handleExpression(const string& line, const unordered_map<string, dataT
                 message = "String not closed\n";
                 throw quote_not_closed(message.c_str());
             }
-            // If currentDataType is either string, char or invalid, it will be assigned string
+            // If currentDataType is either string, char or empty, it will be assigned string
             // Else it return invalid because it is incompatible with string
             switch (currentDataType) {
                 case dataTypes::STRING:
                 case dataTypes::CHAR:
-                case dataTypes::INVALID:
+                case dataTypes::EMPTY:
                     currentDataType = dataTypes::STRING;
                     break;
                 default:
                     return dataTypes::INVALID;
-                    break;
             }
-        // Checks if curently processed argumen is character literal
-        } else if (str.find('\'') != string::npos) {
-            if (str.find_first_of('\'') == 0 && str.find_last_of('\'') == str.length() - 1) {
-                if (currentDataType == dataTypes::CHAR ||
-                    currentDataType == dataTypes::STRING) {
-                        currentDataType == dataTypes::STRING; // Only valid operation with 2 chars
-                        // is appending, so it will result in string
-                } else if (currentDataType == dataTypes::INVALID) {
+        // Checks if curently processed token is character literal
+        } else if (str.find('\'') == 0) { // Checks if token beggins by single quote
+            if (str.find_first_of('\'') != 0 || str.find_last_of('\'') != str.length() - 1) {
+                message = "Character not closed\n";
+                throw quote_not_closed(message.c_str());
+            }
+            switch (currentDataType) {
+                case dataTypes::CHAR: // Only valid operation with 2 chars is appending => string
+                case dataTypes::STRING:
+                    currentDataType == dataTypes::STRING;
+                    break;
+                case dataTypes::EMPTY:
                     currentDataType = dataTypes::CHAR;
-                } else {
-                        return dataTypes::INVALID;
-                }
+                    break;
+                default:
+                    return dataTypes::INVALID;
+            }
+        } else if (str.find('.') != string::npos) { // Checks for real number
+            for (const char& c : str) {
+                if (c == '.') continue; //TODO add check if only 1 dot is present
+                if (c < '0' || c > '9') return dataTypes::INVALID;
+            }
+            switch(currentDataType) {
+                case dataTypes::EMPTY:
+                case dataTypes::REAL:
+                case dataTypes::INTEGER:
+                    currentDataType = dataTypes::REAL;
+                    break;
+                default:
+                    return dataTypes::INVALID;
             }
         }
     }
@@ -121,6 +139,7 @@ dataTypes handleExpression(const string& line, const unordered_map<string, dataT
 bool handleInitializing(const string& line, const unordered_map<string, dataTypes>& variables) {
     vector<string> args = split(line, "<-");
     string message;
+    std::cout << line << '\n';
     //TODO Fix this
     if (args.size() == 1) {
         message = "Expected <expression> or <identifier> after <-\n";
@@ -131,7 +150,7 @@ bool handleInitializing(const string& line, const unordered_map<string, dataType
         throw std::invalid_argument(message);
     }
     dataTypes lineDataType = handleExpression(args[1], variables);
-
+    std::cout << line << "Line data type: " << int(lineDataType) << '\n';
 
     //TODO create handleExpression function to handle possible expressions
     // check is variable name is already declared,

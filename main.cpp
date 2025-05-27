@@ -58,7 +58,7 @@ int main() {
     unsigned int lineNum = 0; // Number of current line bding processed
     while (std::getline(fin, line, '\n')) {
         lineNum++;
-        args = split(line, ' ');
+        args = split(line, ' '); // TODO remove spliting by space
         for (auto position = args.begin(); position != args.end(); ++position) {
             if (keywords.find(*position) != keywords.end()) {
                 switch (keywords[*position]) {

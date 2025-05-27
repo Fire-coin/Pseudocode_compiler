@@ -15,7 +15,7 @@ using std::string, std::vector, std::stringstream,
 
 
 enum class dataTypes {
-    INTEGER, REAL, CHAR, STRING, BOOLEAN, INVALID
+    INTEGER, REAL, CHAR, STRING, BOOLEAN, INVALID, EMPTY
 };
 
 bool loadKeywords(const string& filename, unordered_map<string, int>& keywords);
