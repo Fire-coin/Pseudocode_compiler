@@ -107,7 +107,7 @@ dataTypes handleExpression(const string& line, const unordered_map<string, dataT
             switch (currentDataType) {
                 case dataTypes::CHAR: // Only valid operation with 2 chars is appending => string
                 case dataTypes::STRING:
-                    currentDataType == dataTypes::STRING;
+                    currentDataType = dataTypes::STRING;
                     break;
                 case dataTypes::EMPTY:
                     currentDataType = dataTypes::CHAR;
@@ -129,6 +129,54 @@ dataTypes handleExpression(const string& line, const unordered_map<string, dataT
                 default:
                     return dataTypes::INVALID;
             }
+        } else if (str == "TRUE" || str == "FALSE") {
+            switch(currentDataType) {
+                case dataTypes::EMPTY:
+                case dataTypes::BOOLEAN:
+                    currentDataType = dataTypes::BOOLEAN;
+                    break;
+                default:
+                    return dataTypes::INVALID;
+            }
+        } else {
+            for (const char& c : str) {
+                if (c < '0' || c > '9') {
+                    if (variables.find(str) == variables.end()) {
+                        message = "Uninitialized variable " + str + '\n';
+                        throw uninitialized_variable(message.c_str());
+                    }
+                    if (currentDataType == dataTypes::EMPTY) {
+                        currentDataType = variables.at(str);
+                        break;
+                    }
+                    
+                    switch(variables.at(str)) {
+                        case dataTypes::BOOLEAN:
+                            if (currentDataType != dataTypes::BOOLEAN) return dataTypes::INVALID;
+                            break;
+                        case dataTypes::CHAR:
+                        case dataTypes::STRING:
+                            if (currentDataType != dataTypes::CHAR && currentDataType != dataTypes::STRING)
+                                return dataTypes::INVALID;
+                            currentDataType = dataTypes::STRING;
+                            break;
+                        case dataTypes::INTEGER:
+                            if (currentDataType == dataTypes::INTEGER) currentDataType = dataTypes::INTEGER;
+                            else if (currentDataType == dataTypes::REAL) currentDataType = dataTypes::REAL;
+                            else return dataTypes::INVALID;
+                            break;
+                        case dataTypes::REAL:
+                            if (currentDataType != dataTypes::INTEGER && currentDataType != dataTypes::REAL) 
+                                return dataTypes::INVALID;
+                            currentDataType = dataTypes::REAL;
+                            break;
+                        default:
+                            message = "Impossible data type\n";
+                            throw data_type_exception(message.c_str());
+                    }
+                }
+
+            }
         }
     }
 
@@ -139,7 +187,6 @@ dataTypes handleExpression(const string& line, const unordered_map<string, dataT
 bool handleInitializing(const string& line, const unordered_map<string, dataTypes>& variables) {
     vector<string> args = split(line, "<-");
     string message;
-    std::cout << line << '\n';
     //TODO Fix this
     if (args.size() == 1) {
         message = "Expected <expression> or <identifier> after <-\n";
@@ -150,7 +197,7 @@ bool handleInitializing(const string& line, const unordered_map<string, dataType
         throw std::invalid_argument(message);
     }
     dataTypes lineDataType = handleExpression(args[1], variables);
-    std::cout << line << "Line data type: " << int(lineDataType) << '\n';
+    std::cout << line << "; Line data type: " << int(lineDataType) << '\n';
 
     //TODO create handleExpression function to handle possible expressions
     // check is variable name is already declared,
