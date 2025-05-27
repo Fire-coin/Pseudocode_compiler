@@ -15,8 +15,14 @@ using std::string, std::vector, std::stringstream,
 
 
 enum class dataTypes {
-    INTEGER, REAL, CHAR, STRING, BOOLEAN, INVALID, EMPTY
+    INTEGER, REAL, CHAR, STRING, BOOLEAN, EMPTY,
+    INVALID, INVALID_INTEGER, INVALID_REAL,
+    INVALID_CHAR, INVALID_BOOLEAN, INVALID_STRING
 };
+
+unordered_map<dataTypes, string> typesToStringMap = {{dataTypes::INTEGER, "integer"}, {dataTypes::REAL, "real"},
+                                    {dataTypes::CHAR, "char"}, {dataTypes::STRING, "string"},
+                                    {dataTypes::BOOLEAN, "boolean"}};
 
 bool loadKeywords(const string& filename, unordered_map<string, int>& keywords);
 vector<string> split(const string& line, char delimiter);
@@ -26,6 +32,8 @@ string join(const vector<string>::iterator& start, const vector<string>::iterato
 void writeToFile(const string& message, const string& outputFile);
 bool validName(const string& name, const unordered_map<string, int>& keywords);
 void logError(const unsigned int lineNum, const string& line, const exception& e, bool& validCode);
+string toLower(const string& str);
+dataTypes getDataType(const string& token, const unordered_map<string, dataTypes>& variables);
 
 
 
@@ -118,6 +126,49 @@ void logError(const unsigned int lineNum, const string& line, const exception& e
     validCode = false;
 }
 
+string toLower(const string& str) {
+    string output;
+    for (const char& c : str) {
+        if (c >= 'A' && c <= 'Z') {
+            output += (c + 32);
+        }
+    }
+    return output;
+}
+
+
+dataTypes getDataType(const string& token, const unordered_map<string, dataTypes>& variables) {
+    string message;
+    // Checks if currently processed token is string or character literal
+    if (token.find('"') != string::npos || token.find('\'') != string::npos) {
+        // Checks if token is fully inside of double quotes
+        if (token.find_first_of('"') == 0 && token.find_last_of('"') == token.length() - 1) return dataTypes::STRING;
+        // Checks if token is fully inside of single quotes
+        else if (token.find_first_of('\'') == 0 && token.find_last_of('\'') == token.length() - 1) return dataTypes::CHAR;
+        else return dataTypes::INVALID_STRING;
+    } else if (token.find('.') != string::npos) { // Checks for possible real token
+        // Checks if only 1 dot is present in token
+        if (token.find_first_of('.') != token.find_last_of('.')) return dataTypes::INVALID_REAL;
+        // Scanning through token to see if it consists of only numbers and dot
+        for (const char& c : token) {
+            if (c == '.') continue;
+            if (c < '0' || c > '9') return dataTypes::INVALID_REAL;
+        }
+        return dataTypes::REAL;
+    } else if (toLower(token) == "true" || toLower(token) == "false") { // Checks for possile boolean token
+        if (token == "TRUE" || token == "FALSE") return dataTypes::BOOLEAN; // Returns boolean if case is correct
+        return dataTypes::INVALID_BOOLEAN; // Returns invalid boolean when case is mismatched
+    } else {
+        for (const char& c : token) {
+            if (c < '0' || c > '9') { // Checks if c is not a number
+                if (variables.find(token) != variables.end()) return variables.at(token);
+                return dataTypes::INVALID; // Returns invalid if token is not a variable name
+            }
+        }
+        return dataTypes::INTEGER;
+    }
+    return dataTypes::INVALID_CHAR;
+}
 
 #endif
 #pragma once
