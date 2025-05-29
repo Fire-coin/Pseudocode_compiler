@@ -17,7 +17,8 @@ using std::string, std::vector, std::stringstream,
 enum class dataTypes {
     INTEGER, REAL, CHAR, STRING, BOOLEAN, EMPTY,
     INVALID, INVALID_INTEGER, INVALID_REAL,
-    INVALID_CHAR, INVALID_BOOLEAN, INVALID_STRING
+    INVALID_CHAR, INVALID_BOOLEAN, INVALID_STRING,
+    INVALID_VARIABLE
 };
 
 unordered_map<dataTypes, string> typesToStringMap = {{dataTypes::INTEGER, "integer"}, {dataTypes::REAL, "real"},
@@ -34,6 +35,7 @@ bool validName(const string& name, const unordered_map<string, int>& keywords);
 void logError(const unsigned int lineNum, const string& line, const exception& e, bool& validCode);
 string toLower(const string& str);
 dataTypes getDataType(const string& token, const unordered_map<string, dataTypes>& variables);
+vector<string> getTokens(const string& line);
 
 
 
@@ -131,7 +133,8 @@ string toLower(const string& str) {
     for (const char& c : str) {
         if (c >= 'A' && c <= 'Z') {
             output += (c + 32);
-        }
+        } else 
+            output += c;
     }
     return output;
 }
@@ -144,7 +147,10 @@ dataTypes getDataType(const string& token, const unordered_map<string, dataTypes
         // Checks if token is fully inside of double quotes
         if (token.find_first_of('"') == 0 && token.find_last_of('"') == token.length() - 1) return dataTypes::STRING;
         // Checks if token is fully inside of single quotes
-        else if (token.find_first_of('\'') == 0 && token.find_last_of('\'') == token.length() - 1) return dataTypes::CHAR;
+        else if (token.find_first_of('\'') == 0 && token.find_last_of('\'') == token.length() - 1) {
+            if (token.length() > 3) return dataTypes::INVALID_CHAR; // character has lenght of 1 + 2 single quotes
+            return dataTypes::CHAR;
+        }
         else return dataTypes::INVALID_STRING;
     } else if (token.find('.') != string::npos) { // Checks for possible real token
         // Checks if only 1 dot is present in token
@@ -162,12 +168,28 @@ dataTypes getDataType(const string& token, const unordered_map<string, dataTypes
         for (const char& c : token) {
             if (c < '0' || c > '9') { // Checks if c is not a number
                 if (variables.find(token) != variables.end()) return variables.at(token);
-                return dataTypes::INVALID; // Returns invalid if token is not a variable name
+                return dataTypes::INVALID_VARIABLE; // Returns invalid if token is not a variable name
             }
         }
         return dataTypes::INTEGER;
     }
-    return dataTypes::INVALID_CHAR;
+    return dataTypes::INVALID;
+}
+
+vector<string> getTokens(const string& line) {
+    string pureLine = ""; // This is a line without any operators and brackets
+    string operators = "+-*/()";
+
+    // Deleting any possible operators, to get only tokens
+    for (const char& c : line) {
+        if (operators.find(c) != string::npos) {
+            pureLine += ' ';
+        } else {
+            pureLine += c;
+        }
+    }
+
+    return split(pureLine, ' ');
 }
 
 #endif

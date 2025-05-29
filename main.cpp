@@ -81,6 +81,10 @@ int main() {
                             logError(lineNum, line, e, validCode);
                         } catch (const quote_not_closed& e) {
                             logError(lineNum, line, e, validCode);
+                        } catch (const data_type_exception& e) {
+                            logError(lineNum, line, e, validCode);
+                        } catch (const uninitialized_variable& e) {
+                            logError(lineNum, line, e, validCode);
                         }
                         break;
                     default:

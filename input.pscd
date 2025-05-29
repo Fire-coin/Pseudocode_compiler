@@ -9,14 +9,15 @@ count <- 100
 weight <- 1.56
 H_ello <- (6 * 7) - count
 count <- weight
-weight <- 1.0
-abc <- "Hello world!" + "abc"
+weight <- 1..0
+weight <- 1.0k
+abc <- "Hello world!" + abc"
 abc <- "jkk" + 'l' - '$'
 abc <- "lll" + 'O'
 abc <- 'l' + 'l'
 loUko90_ <- TRUE
-loUko90_ <- FALSE
+loUko90_ <- FALSe
 abc <- abc
-abc <- c
-abc <- c + 'k'
+abc <- cg
+abc <- 'kg'
 weight <- weight + count
