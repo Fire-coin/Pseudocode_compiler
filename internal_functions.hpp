@@ -21,9 +21,9 @@ enum class dataTypes {
     INVALID_VARIABLE
 };
 
-unordered_map<dataTypes, string> typesToStringMap = {{dataTypes::INTEGER, "integer"}, {dataTypes::REAL, "real"},
-                                    {dataTypes::CHAR, "char"}, {dataTypes::STRING, "string"},
-                                    {dataTypes::BOOLEAN, "boolean"}};
+unordered_map<dataTypes, string> typesToStringMap = {{dataTypes::INTEGER, "INTEGER"}, {dataTypes::REAL, "REAL"},
+                                    {dataTypes::CHAR, "CHAR"}, {dataTypes::STRING, "STRING"},
+                                    {dataTypes::BOOLEAN, "BOOLEAN"}};
 
 bool loadKeywords(const string& filename, unordered_map<string, int>& keywords);
 vector<string> split(const string& line, char delimiter);

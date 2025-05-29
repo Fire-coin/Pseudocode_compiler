@@ -5,19 +5,19 @@ DECLARE KlOsc90 : STRING
 DECLARE loUko90_ : BOOLEAN
 DECLARE abc : STRING
 DECLARE c : CHAR
-count <- 100
+count <- 100.9
 weight <- 1.56
+weight <- 99
 H_ello <- (6 * 7) - count
 count <- weight
-weight <- 1..0
-weight <- 1.0k
-abc <- "Hello world!" + abc"
+weight <- 1.0
+weight <- 1.0
+abc <- "Hello world!"
 abc <- "jkk" + 'l' - '$'
 abc <- "lll" + 'O'
 abc <- 'l' + 'l'
 loUko90_ <- TRUE
-loUko90_ <- FALSe
+loUko90_ <- FALSE
 abc <- abc
-abc <- cg
-abc <- 'kg'
+c <- 'g'
 weight <- weight + count

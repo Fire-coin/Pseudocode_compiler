@@ -14,7 +14,7 @@ using std::string, std::vector, std::unordered_map, std::unordered_set;
 
 bool handleDeclare(const string& line, unordered_map<string, string>& dataTypesMap, const unordered_map<string, int>& keywords, unordered_map<string, dataTypes>& variables, const string& outputFile);
 dataTypes handleExpression(const vector<string>& tokens, const unordered_map<string, dataTypes>& variables);
-bool handleInitializing(const string& line, const unordered_map<string, dataTypes>& variables);
+bool handleInitializing(const string& line, const unordered_map<string, dataTypes>& variables, const string& outputFile);
 void throwDataTypeException(unordered_map<dataTypes, string> typesToStringMap, const dataTypes& dataType1, const dataTypes& dataType2);
 
 // This function supports only single declaration on each line.
@@ -132,7 +132,7 @@ dataTypes handleExpression(const vector<string>& tokens, const unordered_map<str
 }
 
 
-bool handleInitializing(const string& line, const unordered_map<string, dataTypes>& variables) {
+bool handleInitializing(const string& line, const unordered_map<string, dataTypes>& variables, const string& outputFile) {
     vector<string> args = split(line, "<-");
     string message;
     //TODO Fix this
@@ -141,13 +141,35 @@ bool handleInitializing(const string& line, const unordered_map<string, dataType
         throw std::invalid_argument(message);
     }
     if (args.size() != 2) {
-        message = "Multiple <- (assighments) not supported on one line\n";
+        message = "Multiple <- (assigments) not supported on one line\n";
         throw std::invalid_argument(message);
     }
+    if (variables.find(args[0]) == variables.end()) {
+        message = "Variable \"" + args[0] + "\" not initialized\n";
+        throw uninitialized_variable(message.c_str());
+    }
+
     vector<string> tokens = getTokens(args[1]);
     dataTypes lineDataType = handleExpression(tokens, variables);
-    // std::cout << line << "; Line data type: " << int(lineDataType) << '\n';
-    
+    switch(variables.at(args[0])) {
+        case dataTypes::REAL:
+            if (lineDataType == dataTypes::INTEGER) lineDataType = dataTypes::REAL;
+            break;
+        case dataTypes::INTEGER:
+            if (lineDataType == dataTypes::REAL) lineDataType = dataTypes::INTEGER;
+            break;
+    }
+    if (variables.at(args[0]) != lineDataType) {
+        message = "Invalid assigment of " + typesToStringMap.at(lineDataType)
+            + " into " + args[0] + " of type: " + typesToStringMap.at(variables.at(args[0]))
+            + '\n';
+        throw data_type_exception(message.c_str());
+    }
+    //TODO add static_cast into double, when required
+    message = args[0] + '=' + args[1];
+    message += ';';
+    writeToFile(message, outputFile);
+
     return true;
 }
 

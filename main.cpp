@@ -47,6 +47,8 @@ int main() {
     // Adding headers to the output file
     writeToFile("#include <iostream>", outputFile);
     writeToFile("#include <string>", outputFile);
+    writeToFile("constexpr bool TRUE = true;", outputFile);
+    writeToFile("constexpr bool FALSE = false;", outputFile);
 
     writeToFile("using namespace std;", outputFile);
 
@@ -65,7 +67,7 @@ int main() {
                     case 0: // DECLARE
                         try {
                             handleDeclare(join(args.begin() + 1, args.end()), 
-                                          dataTypesMap, keywords, variables, outputFile);
+                                dataTypesMap, keywords, variables, outputFile);
                         } catch (const std::invalid_argument& e) {
                             logError(lineNum, line, e, validCode);
                         } catch (const data_type_exception& e) {
@@ -76,7 +78,8 @@ int main() {
                         break;
                     case 1: // <- (assignment operator)
                         try{
-                            handleInitializing(join(args.begin(), args.end()), variables);
+                            handleInitializing(join(args.begin(), args.end()),
+                                variables, outputFile);
                         } catch (const std::invalid_argument& e) {
                             logError(lineNum, line, e, validCode);
                         } catch (const quote_not_closed& e) {
