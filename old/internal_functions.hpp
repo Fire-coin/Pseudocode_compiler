@@ -141,6 +141,7 @@ string toLower(const string& str) {
 
 
 dataTypes getDataType(const string& token, const unordered_map<string, dataTypes>& variables) {
+    //TODO add also negative signs to be allowed in number types
     string message;
     // Checks if currently processed token is string or character literal
     if (token.find('"') != string::npos || token.find('\'') != string::npos) {
@@ -183,13 +184,13 @@ vector<string> getTokens(const string& line) {
     // Deleting any possible operators, to get only tokens
     for (const char& c : line) {
         if (operators.find(c) != string::npos) {
-            pureLine += ' ';
+            pureLine += '~';
         } else {
             pureLine += c;
         }
     }
-
-    return split(pureLine, ' ');
+    std::cout << pureLine<< '\n';
+    return split(pureLine, '~');
 }
 
 #endif

@@ -57,10 +57,11 @@ int main() {
 
     std::string line; // Current line being processed
     std::vector<std::string> args;
-    unsigned int lineNum = 0; // Number of current line bding processed
+    unsigned int lineNum = 0; // Number of current line being processed
     while (std::getline(fin, line, '\n')) {
         lineNum++;
         args = split(line, ' '); // TODO remove spliting by space
+        //TODO pass whole line into handling functions, and they will split the line
         for (auto position = args.begin(); position != args.end(); ++position) {
             if (keywords.find(*position) != keywords.end()) {
                 switch (keywords[*position]) {
@@ -94,7 +95,7 @@ int main() {
                         std::cerr << "Invalid keyword: " << *position << ':' 
                         << keywords[*position] << '\n';
                 }
-                break; // TODO if multiline expressions are allowed it need flag variable
+                break; // TODO if multiline expressions are allowed it needs flag variable
             }
         }
     }

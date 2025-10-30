@@ -74,6 +74,7 @@ dataTypes handleExpression(const vector<string>& tokens, const unordered_map<str
     dataTypes tokenDataType = dataTypes::EMPTY;
 
     for (const string& token : tokens) {
+        // std::cout << token << '_' << '\n';
         tokenDataType = getDataType(token, variables);
         if (tokenDataType == currentDataType && tokenDataType != dataTypes::CHAR) continue;
 
@@ -148,7 +149,7 @@ bool handleInitializing(const string& line, const unordered_map<string, dataType
         message = "Variable \"" + args[0] + "\" not initialized\n";
         throw uninitialized_variable(message.c_str());
     }
-
+    
     vector<string> tokens = getTokens(args[1]);
     dataTypes lineDataType = handleExpression(tokens, variables);
     switch(variables.at(args[0])) {
@@ -165,7 +166,7 @@ bool handleInitializing(const string& line, const unordered_map<string, dataType
             + '\n';
         throw data_type_exception(message.c_str());
     }
-    //TODO add static_cast into double, when required
+    //TODO add static_cast into double, when doing division
     message = args[0] + '=' + args[1];
     message += ';';
     writeToFile(message, outputFile);
