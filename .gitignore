@@ -1,1 +1,14 @@
 .vscode
+# ignore build output
+build/
+CMakeFiles/
+CMakeCache.txt
+*.cmake
+*.o
+*.obj
+*.exe
+*.out
+*.log
+*.a
+*.lib
+*.pdb
