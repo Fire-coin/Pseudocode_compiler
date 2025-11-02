@@ -24,7 +24,7 @@ int main() {
         return -1;
     }
     std::vector<Token> tokens;
-    getTokens(source, tokens);
+    getTokens(source, tokens, 4);
     for (auto i : tokens) {
         std::cout << "Token Name: " << showTokenName(i.tokenName) << "; Token Value: " << i.tokenValue << std::endl;
     }

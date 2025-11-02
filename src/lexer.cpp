@@ -39,7 +39,9 @@ std::vector<std::string> keywords = {
     "BOOLEAN",
     "STRING", 
     "WHILE",
-    "ENDWHILE"
+    "ENDWHILE",
+    "INPUT",
+    "OUTPUT"
 };
 
 extern std::vector<std::pair<TokenName, std::string>> patterns = {
@@ -63,7 +65,8 @@ int getToken(std::string& source, const std::string& pattern, std::string& buffe
         return -1;
 }
 /* TODO: Add invalid token */
-void getTokens(std::string& source, std::vector<Token>& tokens) {
+void getTokens(std::string& source, std::vector<Token>& tokens, int indent) {
+    int spaces = 0;
     while (source != "") {
         for (auto it = patterns.begin(); it != patterns.end(); ++it) {
             std::string buffer;
@@ -77,11 +80,22 @@ void getTokens(std::string& source, std::vector<Token>& tokens) {
                     default:
                         break;
                 }
-                Token token;
-                token.tokenName = it->first;
-                token.tokenValue = buffer;
-                tokens.push_back(token);
-
+                if (buffer == " ") {
+                    spaces++;
+                    if (spaces == indent) {
+                        Token token;
+                        token.tokenName = it->first;
+                        token.tokenValue = "<tab>";
+                        spaces = 0;
+                        tokens.push_back(token);
+                    }
+                } else {
+                    spaces = 0;
+                    Token token;
+                    token.tokenName = it->first;
+                    token.tokenValue = buffer;
+                    tokens.push_back(token);
+                }
                 source = source.substr(buffer.size(), source.size() - buffer.size());
             }
         }

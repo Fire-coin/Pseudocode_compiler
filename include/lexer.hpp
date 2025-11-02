@@ -24,7 +24,7 @@ struct Token {
 int getToken(std::string& source, const std::string& pattern, std::string& buffer);
 
 
-void getTokens(std::string& source, std::vector<Token>& tokens);
+void getTokens(std::string& source, std::vector<Token>& tokens, int indent);
 
 std::string showTokenName(TokenName tokenName);
 
