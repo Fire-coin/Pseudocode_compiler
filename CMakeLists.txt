@@ -7,6 +7,12 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 
 include(FetchContent)
 
+# FetchContent_Declare(
+#   abseil
+#   GIT_REPOSITORY https://github.com/abseil/abseil-cpp/archive/refs/tags/20250127.0.zip
+# )
+# FetchContent_MakeAvailable(abseil)
+
 # --- Abseil ---
 set(ABSL_ENABLE_INSTALL ON)
 set(ABSL_BUILD_TESTING OFF)
@@ -14,7 +20,7 @@ set(ABSL_PROPAGATE_CXX_STD ON)
 FetchContent_Declare(
   abseil
   GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
-  GIT_TAG 20240722.0
+  GIT_TAG 20250814.1
   GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(abseil)

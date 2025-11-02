@@ -4,6 +4,9 @@
 #include <re2/re2.h>
 #include <unordered_map>
 #include <string>
+#include <utility>
+
+/* TODO: Create errors enum, to track them easier. */
 
 enum TokenName {IDENTIFIER, KEYWORD, OPERATOR, SEPARATOR, COMMENT, LITERAL};
 
@@ -12,7 +15,7 @@ enum TokenName {IDENTIFIER, KEYWORD, OPERATOR, SEPARATOR, COMMENT, LITERAL};
    These values will be stored in text files and loaded during runtime. */
 using preset = std::unordered_map<std::string, std::string>;
 
-extern std::unordered_map<TokenName, RE2> patterns;
+extern std::vector<std::pair<TokenName, std::string>> patterns;
 
 extern preset keywords;
 extern preset operators;
@@ -25,6 +28,8 @@ int loadOperators(preset& operators);
 int loadSeparators(preset& separators);
 
 int loadAllPresets(preset& keywords, preset& operators, preset& separators);
+
+int getToken(std::string& source, const std::string& pattern, std::string& buffer);
 
 #endif
 #pragma once
