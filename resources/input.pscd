@@ -30,3 +30,6 @@ DECLARE op : CHAR
 operator <-- ' '
 symbol <-- '!'
 op <--'<'
+
+DECLARE val : INTEGER
+val<--DIV(4341, 7)

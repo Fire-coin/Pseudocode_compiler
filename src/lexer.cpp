@@ -112,8 +112,8 @@ extern std::vector<std::pair<TokenName, std::string>> patterns = {
     {TokenName::KEYWORD, "^([A-Z]+)"},
     {TokenName::IDENTIFIER, "^([a-zA-Z][a-zA-Z_0-9]*)"},
     {TokenName::COMMENT, "^(//.*)\n"},
-    {TokenName::OPERATOR, "^(<--|<=|>=|<>|[+\\-*/<>=])"},
-    {TokenName::SEPARATOR, "^(;|:|,)"},
+    {TokenName::OPERATOR, "^(<--|<=|>=|<>|[+\\-*/<>=^&])"},
+    {TokenName::SEPARATOR, "^([:,()[\\]])"},
     {TokenName::LITERAL, "^(\".*\"|\'[ -~]{1}\'|\\d+(.\\d+)?)"},
     {TokenName::WHITESPACE, "^(\\s)"}
 };
