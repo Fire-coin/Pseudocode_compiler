@@ -3,6 +3,10 @@ DECLARE flag : BOOLEAN
 DECLARE name : STRING
 DECLARE HELLO : STRING
 DECLARE buffer : STRING
+DECLARE pi : REAL
+DECLARE e : REAL
+DECLARE length : REAL
+
 // This is a count variable
 // Another comment on the count
 count <-- 0
@@ -15,3 +19,14 @@ WHILE count < 5 // IT goes up to 5
     name <-- name + buffer
     count <-- count + 1
 ENDWHILE
+
+pi <-- 3.14159
+e <-- 2.71828
+length<--1.0*pi/e
+
+DECLARE operator : CHAR
+DECLARE symbol : CHAR
+DECLARE op : CHAR
+operator <-- ' '
+symbol <-- '!'
+op <--'<'
