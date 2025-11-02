@@ -111,9 +111,9 @@ std::vector<std::string> keywords = {
 extern std::vector<std::pair<TokenName, std::string>> patterns = {
     {TokenName::KEYWORD, "^([A-Z]+)"},
     {TokenName::IDENTIFIER, "^([a-zA-Z][a-zA-Z_0-9]+)"},
+    {TokenName::COMMENT, "^(//.*)\n"},
     {TokenName::OPERATOR, "^(<--|<=|>=|<>|[+\\-*/<>=])"},
     {TokenName::SEPARATOR, "^(;|:|,)"},
-    {TokenName::COMMENT, "^(//.*\n)"},
     {TokenName::LITERAL, "^(\".*\"|\'[ -~]{1}\'|\\d+(.\\d+)?)"},
     {TokenName::WHITESPACE, "^(\\s)"}
 };
@@ -140,6 +140,10 @@ void getTokens(std::string& source, std::vector<Token>& tokens, int indent) {
                     case TokenName::KEYWORD: /* XXX: Not sure about continue inside of switch, maybe it can cause error. */
                         /* Checking wheter it is actually a keyword or only identifier */
                         if (std::find(keywords.begin(), keywords.end(), buffer) == keywords.end()) continue;
+                        break;
+                    case TokenName::COMMENT:
+                        source = source.substr(buffer.size(), source.size() - buffer.size());
+                        continue;
                         break;
                     default:
                         break;
