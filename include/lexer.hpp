@@ -26,5 +26,7 @@ int getToken(std::string& source, const std::string& pattern, std::string& buffe
 
 void getTokens(std::string& source, std::vector<Token>& tokens);
 
+std::string showTokenName(TokenName tokenName);
+
 #endif
 #pragma once

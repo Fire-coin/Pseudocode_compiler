@@ -1,0 +1,16 @@
+DECLARE count : INTEGER
+DECLARE flag : BOOLEAN
+DECLARE name : STRING
+DECLARE HELLO : STRING
+DECLARE buffer : STRING
+
+count <-- 0
+flag <-- TRUE
+name <-- "JOHN smith"
+HELLO <-- "Good morning"
+
+WHILE count < 5
+    INPUT buffer
+    name <-- name + buffer
+    count <-- count + 1
+ENDWHILE
