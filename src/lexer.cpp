@@ -2,18 +2,24 @@
 #include "string_utils.hpp"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
-preset keywords = {};
+preset keywordss = {};
 preset operators = {};
 preset separators = {};
 
+std::vector<std::string> keywords = {
+    "DECLARE"
+};
+
 extern std::vector<std::pair<TokenName, std::string>> patterns = {
-    {TokenName::IDENTIFIER, "^[a-zA-Z][a-zA-Z_0-9]+"},
-    {TokenName::KEYWORD, "^[A-Z]+"},
-    {TokenName::OPERATOR, "^[+-*/<>=]|->|<=|>=|<>"},
+    {TokenName::KEYWORD, "^([A-Z]+)"},
+    {TokenName::IDENTIFIER, "^([a-zA-Z][a-zA-Z_0-9]+)"},
+    {TokenName::OPERATOR, "^([+\\-*/<>=]|->|<=|>=|<>)"},
     {TokenName::SEPARATOR, "^(;|:|,)"},
-    {TokenName::COMMENT, "^//.*\n"},
-    {TokenName::LITERAL, "^\".\"|\\d+(.\\d+)?"}
+    {TokenName::COMMENT, "^(//.*\n)"},
+    {TokenName::LITERAL, "^(\".\"|\\d+(.\\d+)?)"},
+    {TokenName::WHITESPACE, "^(\\s)"}
 };
 
 int loadPreset(preset& preset, std::string path) {
@@ -33,7 +39,7 @@ int loadPreset(preset& preset, std::string path) {
 
 
 int loadKeywords() {
-    return loadPreset(keywords, "resources/keywords.txt");
+    return loadPreset(keywordss, "resources/keywords.txt");
 }
 
 int loadOperators() {
@@ -58,4 +64,27 @@ int getToken(std::string& source, const std::string& pattern, std::string& buffe
         return 0;
     else 
         return -1;
+}
+
+void getTokens(std::string& source, std::vector<Token>& tokens) {
+    while (source != "") {
+        for (auto it = patterns.begin(); it != patterns.end(); ++it) {
+            std::string buffer;
+            int success = getToken(source, it->second, buffer);
+            std::cout << success << it->second << std::endl;
+            if (success == 0) {
+                if (it->first == TokenName::KEYWORD) {
+                    /* Checking wheter it is actually a keyword or only identifier */
+                    if (std::find(keywords.begin(), keywords.end(), buffer) == keywords.end()) continue;
+                }
+                Token token;
+                token.tokenName = it->first;
+                token.tokenValue = buffer;
+                tokens.push_back(token);
+
+                source = source.substr(buffer.size(), source.size() - buffer.size());
+            }
+        }
+        std::cout << source << std::endl;
+    }
 }
