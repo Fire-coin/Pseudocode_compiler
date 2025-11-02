@@ -21,13 +21,18 @@ extern preset keywords;
 extern preset operators;
 extern preset separators;
 
+struct Token {
+   TokenName tokenName;
+   std::string tokenValue;
+};
+
 int loadPreset(preset& preset, std::string path);
 
-int loadKeywords(preset& keywords);
-int loadOperators(preset& operators);
-int loadSeparators(preset& separators);
+int loadKeywords();
+int loadOperators();
+int loadSeparators();
 
-int loadAllPresets(preset& keywords, preset& operators, preset& separators);
+int loadAllPresets();
 
 int getToken(std::string& source, const std::string& pattern, std::string& buffer);
 
