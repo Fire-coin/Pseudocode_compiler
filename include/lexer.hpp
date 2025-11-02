@@ -10,30 +10,14 @@
 
 enum TokenName {IDENTIFIER, KEYWORD, OPERATOR, SEPARATOR, COMMENT, LITERAL, WHITESPACE};
 
-/* Preset maps a string pattern found in input, to the value which will be passed to the parser. 
-   E.G DECLARE is mapped to DECLARE, but * is mapped to MUL.
-   These values will be stored in text files and loaded during runtime. */
-using preset = std::unordered_map<std::string, std::string>;
-
 extern std::vector<std::pair<TokenName, std::string>> patterns;
 
-extern preset keywordss;
 extern std::vector<std::string> keywords;
-extern preset operators;
-extern preset separators;
 
 struct Token {
    TokenName tokenName;
    std::string tokenValue;
 };
-
-int loadPreset(preset& preset, std::string path);
-
-int loadKeywords();
-int loadOperators();
-int loadSeparators();
-
-int loadAllPresets();
 
 /* Scans for pattern in the begging of the source. If it has found a match, it returns it in buffer.
    Else the buffer stays empty. */

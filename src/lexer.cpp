@@ -4,9 +4,6 @@
 #include <fstream>
 #include <algorithm>
 
-preset keywordss = {};
-preset operators = {};
-preset separators = {};
 
 std::vector<std::string> keywords = {
     "DECLARE"
@@ -22,39 +19,6 @@ extern std::vector<std::pair<TokenName, std::string>> patterns = {
     {TokenName::WHITESPACE, "^(\\s)"}
 };
 
-int loadPreset(preset& preset, std::string path) {
-    std::ifstream fin(path);
-    if (!fin.is_open()) {
-        std::cerr << "Could not open file: " << path << std::endl;
-        return -1;
-    }
-    std::string line;
-    while (std::getline(fin, line)) {
-        std::vector<std::string> pair = split(line, ';');
-        preset[pair[0]] = pair[1];
-        
-    }
-    return 0;
-}
-
-
-int loadKeywords() {
-    return loadPreset(keywordss, "resources/keywords.txt");
-}
-
-int loadOperators() {
-    return loadPreset(operators, "resources/operators.txt");
-}
-
-int loadSeparators() {
-    return loadPreset(separators, "resources/separators.txt");
-}
-
-int loadAllPresets() {
-    return loadKeywords() |
-        loadOperators()  |
-        loadSeparators();
-}
 
 int getToken(std::string& source, const std::string& pattern, std::string& buffer) {
     absl::string_view input(source);     // create persistent view

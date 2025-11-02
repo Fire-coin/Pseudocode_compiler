@@ -3,7 +3,6 @@
 #include <re2/re2.h>
 
 int main() {
-    loadKeywords();
     std::string buffer;
     std::string source = "Hello from CMake project";
     std::string pattern = "^([a-zA-Z][a-zA-Z_0-9]+)";
