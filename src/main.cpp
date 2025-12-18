@@ -2,6 +2,7 @@
 #include <iostream>
 #include <re2/re2.h>
 #include <fstream>
+#include "parser.hpp"
 
 int readFile(std::string& output, const std::string& path) {
     std::ifstream fin(path);
@@ -18,7 +19,7 @@ int readFile(std::string& output, const std::string& path) {
 
 int main() {
     std::string source;
-    int error = readFile(source, "resources/input.pscd");
+    int error = readFile(source, "resources/parser_test.pscd");
     if (error) {
         std::cerr << "Could not open file.\n";
         return -1;
@@ -28,4 +29,9 @@ int main() {
     for (auto i : tokens) {
         std::cout << "Token Name: " << showTokenName(i.tokenName) << "; Token Value: " << i.tokenValue << std::endl;
     }
+
+    Parser parser(tokens);
+    for (int i = 0; i < tokens.size(); ++i)
+        parser.nextSym();
+    
 }

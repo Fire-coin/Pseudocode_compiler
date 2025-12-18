@@ -33,6 +33,7 @@ add_executable(PseudocodeTranspiler
     src/main.cpp
     src/lexer.cpp
     src/string_utils.cpp
+    src/parser.cpp
 )
 
 target_include_directories(PseudocodeTranspiler PRIVATE include)
