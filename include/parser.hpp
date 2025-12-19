@@ -6,13 +6,20 @@
 
 enum Symbol {not_token= -1, ident, plus, minus, star, slash, lparen, rparen, num_lit};
 
-class Parser {
-    private:
-        const std::vector<Token>& tokens;
-        long long index;
-    public:
-        Parser(const std::vector<Token>&);
-        void nextSym();
+
+struct Parser {
+    std::vector<Token> tokens;
+    long long index;
+
+    Parser();
+    Parser(std::vector<Token> arr);
+    void nextSym();
+
+    int accept(Symbol);
+    int expect(Symbol);
+    void factor();
+    void term();
+    void expr();
 };
 
 Symbol lexerToParser(Token token);

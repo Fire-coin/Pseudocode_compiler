@@ -1,5 +1,1 @@
-DECLARE area : REAL
-DECLARE width : REAL
-DECLARE height : REAL
-
-area <-- height + (width - 2 * (-3))
+(height * 2 - 66/ 3) + (width - 2 * (-3))

@@ -31,7 +31,5 @@ int main() {
     }
 
     Parser parser(tokens);
-    for (int i = 0; i < tokens.size(); ++i)
-        parser.nextSym();
-    
+    parser.expr();
 }
