@@ -26,12 +26,5 @@ struct Parser {
 
 Symbol lexerToParser(Token token);
 
-int accept(Symbol s);
-int expect(Symbol s);
-
-void factor();
-void term();
-void expr();
-
 #endif
 #pragma once

@@ -2,7 +2,6 @@
 #define PSCD_TRANSPILER_LEXER_HPP
 
 #include <re2/re2.h>
-#include <unordered_map>
 #include <string>
 #include <utility>
 
