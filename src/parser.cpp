@@ -3,10 +3,6 @@
 
 Symbol sym;
 
-std::vector<Token> dummy_parser_transpiler = {Token()};
-
-Parser::Parser(): tokens(dummy_parser_transpiler), index(0) {}
-
 Parser::Parser(std::vector<Token> arr): tokens(arr), index(0) {
         this->nextSym();
 }

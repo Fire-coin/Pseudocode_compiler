@@ -167,6 +167,5 @@ void getTokens(std::string& source, std::vector<Token>& tokens, int indent) {
                 source = source.substr(buffer.size(), source.size() - buffer.size());
             }
         }
-        std::cout << std::endl << source << std::endl;
     }
 }

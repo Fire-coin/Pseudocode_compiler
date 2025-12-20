@@ -11,7 +11,6 @@ struct Parser {
     std::vector<Token> tokens;
     long long index;
 
-    Parser();
     Parser(std::vector<Token> arr);
     void nextSym();
 
