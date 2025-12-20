@@ -4,7 +4,7 @@
 #include <iostream>
 #include "lexer.hpp"
 
-enum Symbol {not_token= -1, ident, plus, minus, star, slash, lparen, rparen, num_lit};
+enum Symbol {not_token= -1, ident, plus, minus, star, slash, lparen, rparen, num_lit, eq, neq, less, great, lesseq, greateq, notsym, orsym, andsym};
 
 
 struct Parser {
@@ -19,6 +19,9 @@ struct Parser {
     void factor();
     void term();
     void expr();
+
+    void condition();
+    void bool_expr();
 };
 
 Symbol lexerToParser(Token token);

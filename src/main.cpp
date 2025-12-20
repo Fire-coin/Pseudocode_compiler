@@ -32,4 +32,7 @@ int main() {
 
     Parser parser(tokens);
     parser.expr();
+    parser.nextSym();
+    std::cout << "\n\n\n";
+    parser.bool_expr();
 }
