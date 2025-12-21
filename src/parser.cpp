@@ -1,24 +1,37 @@
 #include "parser.hpp"
 #include <iostream>
+#include <algorithm>
 
 Symbol sym;
+std::vector<std::string> dtypes = {"INTEGER", "REAL", "CHAR", "STRING", "BOOLEAN"};
 
 Parser::Parser(std::vector<Token> arr): tokens(arr), index(0) {
-        this->nextSym();
+    this->nextSym();
 }
 
+int is_dtype(std::string type) {
+    std::cout << "Is_dtype called\n";
+    for (int i = 0; i < dtypes.size(); ++i) {
+        std::cout << dtypes[i] << std::endl;
+        if (type == dtypes[i])
+            return 1;
+    }
+    return 0;
+}
+
+
+
 void Parser::nextSym() {
-    std::cout << "tokens size: " << this->tokens.size() << " index: " << index << std::endl;
+    // std::cout << "tokens size: " << this->tokens.size() << " index: " << index << std::endl;
     if (index < this->tokens.size()) {
         sym = lexerToParser(this->tokens[index]);
         this->index++;
-        std::cout << "parser sym: " << sym << std::endl;
+        // std::cout << "parser sym: " << sym << std::endl;
     }
 }
 
 Symbol lexerToParser(Token token) {
-    switch (token.tokenName)
-    {
+    switch (token.tokenName) {
     case IDENTIFIER:
         return Symbol::ident;
         break;
@@ -42,7 +55,9 @@ Symbol lexerToParser(Token token) {
         else if (token.tokenValue == ">=")
             return Symbol::greateq;
         else if (token.tokenValue == "<=")
-            return lesseq;
+            return Symbol::lesseq;
+        else if (token.tokenValue == "<--")
+            return Symbol::assignsym;
         else
             return Symbol::not_token;
         break;
@@ -51,6 +66,12 @@ Symbol lexerToParser(Token token) {
             return Symbol::lparen;
         else if (token.tokenValue == ")")
             return Symbol::rparen;
+        else if (token.tokenValue == ",")
+            return Symbol::comma;
+        else if (token.tokenValue == ":")
+            return Symbol::colon;
+        
+        
         else
             return Symbol::not_token;
         break;
@@ -65,6 +86,35 @@ Symbol lexerToParser(Token token) {
             return Symbol::andsym;
         else if (token.tokenValue == "OR")
             return Symbol::orsym;
+        else if (token.tokenValue == "DECLARE")
+            return Symbol::declsym;
+        else if (token.tokenValue == "INPUT")
+            return Symbol::inputsym;
+        else if (token.tokenValue == "IF")
+            return Symbol::ifsym;
+        else if (token.tokenValue == "THEN")
+            return Symbol::thensym;
+        else if (token.tokenValue == "ENDIF")
+            return Symbol::eifsym;
+        else if (token.tokenValue == "ELSE")
+            return Symbol::elsesym;
+        else if (token.tokenValue == "WHILE")
+            return Symbol::whilesym;
+        else if (token.tokenValue == "ENDWHILE")
+            return Symbol::ewhilesym;
+        else if (token.tokenValue == "TRUE")
+            return Symbol::truesym;
+        else if (token.tokenValue == "FALSE")
+            return Symbol::falsesym;
+        else if (is_dtype(token.tokenValue))
+            return Symbol::dtype;
+        else
+            return Symbol::not_token;
+    case WHITESPACE:
+        if (token.tokenValue == "\n")
+            return Symbol::eol;
+        else if (token.tokenValue == "<tab>")
+            return Symbol::indent;
         else
             return Symbol::not_token;
     default:
@@ -131,12 +181,18 @@ void Parser::condition() {
     std::cout << "Condition called\n";
     if (accept(notsym))
         ;
-    expr();
+    if (sym == truesym || sym == falsesym)
+        nextSym();
+    else
+        expr();
     if (sym == eq || sym == neq || sym == great || sym == less || sym == greateq || sym == lesseq) {
         nextSym();
-        expr();
+        if (sym == truesym || sym == falsesym)
+            nextSym();
+        else
+            expr();
     } else
-        std::cout << "Parser: error unexpected token " << sym << std::endl;
+        std::cout << "Condition: error unexpected token " << sym << std::endl;
 }
 
 void Parser::bool_expr() {
@@ -145,5 +201,62 @@ void Parser::bool_expr() {
     while (sym == andsym || sym == orsym) {
         nextSym();
         condition();
+    }
+}
+
+int Parser::statement() {
+    std::cout << "Statement called\n";
+    /* Consuming the indentation before statements, if they are inside of block */
+    while (accept(indent))
+        ;
+    if (accept(declsym)) { // Declaration of vaeriable
+        expect(ident);
+        while (accept(comma))
+            expect(ident);
+        expect(colon);
+        expect(dtype);
+        expect(eol);
+    } else if (accept(ident)) { // Assignment of variable
+        expect(assignsym);
+        expr();
+        expect(eol);
+    } else if (accept(inputsym)) { // Input statement
+        expect(ident);
+        expect(eol);
+    } else if (accept(ifsym)) { // If statement
+        bool_expr();
+        if (accept(eol))
+            ;
+        expect(thensym); // Body of if statement
+        expect(eol);
+        block();
+
+        if (accept(elsesym)) { // Optional else statement
+            expect(eol);            
+            block();
+        } 
+        expect(eifsym); // End of if statements
+        expect(eol);
+    } else if (accept(whilesym)) { // While statement
+        bool_expr();
+        expect(eol);
+        block();
+        expect(ewhilesym);
+        expect(eol);
+    } else {
+        std::cout << "Statement: error unexpected token: " << sym << std::endl;
+        return 0;
+    }
+    return 1;
+}
+
+void Parser::block() {
+    std::cout << "Block called\n";
+    while (sym != eifsym && sym != ewhilesym && sym != elsesym) {
+        if (!statement()) 
+            break;
+        while (accept(indent))
+            ;
+        std::cout << "Block: sym is "<< sym << std::endl;
     }
 }

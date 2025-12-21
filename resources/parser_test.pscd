@@ -1,2 +1,14 @@
 (height * 2 - 66/ 3) + (width - 2 * (-3))
 NOT width - 6 * (-1.5) = (height * 2 - 66/ 3) OR NOT width <= height
+height <-- width / 2 + 4.2
+IF flag = TRUE AND width < 32 THEN
+    DECLARE perimeter, area : REAL
+    area <-- width * height
+    WHILE area > 10
+        perimeter <-- perimeter + 1
+        area <-- area - 1
+    ENDWHILE
+ELSE
+    DECLARE area : REAL
+    INPUT area
+ENDIF

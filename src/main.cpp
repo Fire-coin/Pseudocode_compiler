@@ -35,4 +35,8 @@ int main() {
     parser.nextSym();
     std::cout << "\n\n\n";
     parser.bool_expr();
+    parser.nextSym();
+    std::cout << "\n\n\n\n";
+    parser.statement();
+    parser.statement();
 }
