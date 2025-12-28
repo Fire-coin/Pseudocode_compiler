@@ -78,6 +78,8 @@ Symbol lexerToParser(Token token) {
     case LITERAL:
         if (token.tokenValue.find('\'') == token.tokenValue.npos && token.tokenValue.find('"') == token.tokenValue.npos)
             return Symbol::num_lit;
+        else
+            return Symbol::not_token;
         break;
     case KEYWORD:
         if (token.tokenValue == "NOT")
@@ -137,16 +139,22 @@ int Parser::expect(Symbol s) {
     return 0;
 }
 
-void Parser::factor() {
+std::unique_ptr<expr> Parser::parseFactor() {
     std::cout << "factor called\n";
-    if (accept(ident))
-        ;
+    if (accept(ident)) {
+        std::unique_ptr<var_expr> p = std::make_unique<var_expr>();
+        p->var = tokens[index - 1].tokenValue;
+        return p;
+    }
     else if (accept(num_lit)) {
-        ;
+        std::unique_ptr<lit_expr> p = std::make_unique<lit_expr>();
+        p->val = tokens[index - 1].tokenValue;
+        return p;
     }
     else if (accept(lparen)) {
-        expr();
+        std::unique_ptr<expr> p = parseExpr();
         expect(rparen);
+        return p;
     } else {
         std::cout << "Factor: syntax error\n";
         std::cout << sym << std::endl;
@@ -154,16 +162,28 @@ void Parser::factor() {
     }
 }
 
-void Parser::term() {
+std::unique_ptr<expr> Parser::term() {
     std::cout << "term called\n";
-    factor();
+    std::unique_ptr<expr> p1 = parseFactor();
+    if (sym != star && sym != slash)
+        return p1;
+    
+    std::unique_ptr<bin_expr> root = std::make_unique<bin_expr>();
+    root->op = tokens[index - 1].tokenValue;
+    nextSym();
+    std::unique_ptr<expr> p2 = parseFactor();
+
+    root->left = std::move(p1);
+    root->right = std::move(p2);
+    /* TODO finish the binary node */
     while (sym == star || sym == slash) {
         nextSym();
-        factor();
+        p1 = parseFactor();
+
     }
 }
 
-void Parser::expr() {
+std::unique_ptr<expr> Parser::parseExpr() {
     std::cout << "expr called\n";
     if (sym == plus || sym == minus)
         nextSym();
@@ -175,38 +195,38 @@ void Parser::expr() {
 }
 
 /* TODO: Fix this
-    Will not accept condition, if it is fully surrounded by parentheses
+    Will not accept parseCondition, if it is fully surrounded by parentheses
 */
-void Parser::condition() {
-    std::cout << "Condition called\n";
+void Parser::parseCondition() {
+    std::cout << "parseCondition called\n";
     if (accept(notsym))
         ;
     if (sym == truesym || sym == falsesym)
         nextSym();
     else
-        expr();
+        parseExpr();
     if (sym == eq || sym == neq || sym == great || sym == less || sym == greateq || sym == lesseq) {
         nextSym();
         if (sym == truesym || sym == falsesym)
             nextSym();
         else
-            expr();
+            parseExpr();
     } else
-        std::cout << "Condition: error unexpected token " << sym << std::endl;
+        std::cout << "parseCondition: error unexpected token " << sym << std::endl;
 }
 
-void Parser::bool_expr() {
-    std::cout << "Bool_expr called\n";
-    condition();
+void Parser::parseBoolExpr() {
+    std::cout << "parseBoolExpr called\n";
+    parseCondition();
     while (sym == andsym || sym == orsym) {
         nextSym();
-        condition();
+        parseCondition();
     }
 }
 
-int Parser::statement() {
-    std::cout << "Statement called\n";
-    /* Consuming the indentation before statements, if they are inside of block */
+int Parser::parseStatement() {
+    std::cout << "parseStatement called\n";
+    /* Consuming the indentation before parseStatements, if they are inside of parseBlock */
     while (accept(indent))
         ;
     if (accept(declsym)) { // Declaration of vaeriable
@@ -218,45 +238,45 @@ int Parser::statement() {
         expect(eol);
     } else if (accept(ident)) { // Assignment of variable
         expect(assignsym);
-        expr();
+        parseExpr();
         expect(eol);
-    } else if (accept(inputsym)) { // Input statement
+    } else if (accept(inputsym)) { // Input parseStatement
         expect(ident);
         expect(eol);
-    } else if (accept(ifsym)) { // If statement
-        bool_expr();
+    } else if (accept(ifsym)) { // If parseStatement
+        parseBoolExpr();
         if (accept(eol))
             ;
-        expect(thensym); // Body of if statement
+        expect(thensym); // Body of if parseStatement
         expect(eol);
-        block();
+        parseBlock();
 
-        if (accept(elsesym)) { // Optional else statement
+        if (accept(elsesym)) { // Optional else parseStatement
             expect(eol);            
-            block();
+            parseBlock();
         } 
-        expect(eifsym); // End of if statements
+        expect(eifsym); // End of if parseStatements
         expect(eol);
-    } else if (accept(whilesym)) { // While statement
-        bool_expr();
+    } else if (accept(whilesym)) { // While parseStatement
+        parseBoolExpr();
         expect(eol);
-        block();
+        parseBlock();
         expect(ewhilesym);
         expect(eol);
     } else {
-        std::cout << "Statement: error unexpected token: " << sym << std::endl;
+        std::cout << "parseStatement: error unexpected token: " << sym << std::endl;
         return 0;
     }
     return 1;
 }
 
-void Parser::block() {
-    std::cout << "Block called\n";
+void Parser::parseBlock() {
+    std::cout << "parseBlock called\n";
     while (sym != eifsym && sym != ewhilesym && sym != elsesym) {
-        if (!statement()) 
+        if (!parseStatement()) 
             break;
         while (accept(indent))
             ;
-        std::cout << "Block: sym is "<< sym << std::endl;
+        std::cout << "parseBlock: sym is "<< sym << std::endl;
     }
 }

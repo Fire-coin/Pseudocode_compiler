@@ -3,7 +3,9 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include "lexer.hpp"
+#include "AST.hpp"
 
 enum Symbol {not_token= -1, ident, plus, minus, star, slash, lparen, rparen, num_lit, eq, neq, less, great, lesseq, greateq,
              notsym, orsym, andsym, declsym, comma, colon, dtype, eol, assignsym, inputsym, ifsym, eifsym, elsesym, whilesym,
@@ -19,15 +21,15 @@ struct Parser {
 
     int accept(Symbol);
     int expect(Symbol);
-    void factor();
-    void term();
-    void expr();
+    std::unique_ptr<expr> parseFactor();
+    std::unique_ptr<expr> term();
+    std::unique_ptr<expr> parseExpr();
 
-    void condition();
-    void bool_expr();
+    void parseCondition();
+    void parseBoolExpr();
 
-    int statement();
-    void block();
+    int parseStatement();
+    void parseBlock();
 };
 
 Symbol lexerToParser(Token token);
