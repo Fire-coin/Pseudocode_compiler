@@ -18,9 +18,13 @@ struct ASTNode {
     virtual ~ASTNode() = default;
 };
 
-struct expr : public ASTNode {};
+struct expr : public ASTNode {
+	void visitor();
+};
 
-struct stmt : public ASTNode {};
+struct stmt : public ASTNode {
+	void visitor();
+};
 
 struct bin_expr : public expr {
     std::string op;

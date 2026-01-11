@@ -22,7 +22,7 @@ struct Parser {
     int accept(Symbol);
     int expect(Symbol);
     std::unique_ptr<expr> parseFactor();
-    std::unique_ptr<expr> term();
+    std::unique_ptr<expr> parseTerm();
     std::unique_ptr<expr> parseExpr();
 
     void parseCondition();

@@ -1,3 +1,4 @@
+(height * 2 / 4 * width / width * area)
 (height * 2 - 66/ 3) + (width - 2 * (-3))
 NOT width - 6 * (-1.5) = (height * 2 - 66/ 3) OR NOT width <= height
 height <-- width / 2 + 4.2

@@ -19,9 +19,10 @@ int readFile(std::string& output, const std::string& path) {
 
 int main() {
     std::string source;
-    int error = readFile(source, "resources/parser_test.pscd");
+    std::string file = "resources/parser_test.pscd";
+    int error = readFile(source, file);
     if (error) {
-        std::cerr << "Could not open file.\n";
+        std::cerr << "Could not open file: " << file << "\n";
         return -1;
     }
     std::vector<Token> tokens;
@@ -31,12 +32,15 @@ int main() {
     }
 
     Parser parser(tokens);
-    parser.expr();
+    parser.parseExpr();
     parser.nextSym();
     std::cout << "\n\n\n";
-    parser.bool_expr();
+    parser.parseExpr();
+    parser.nextSym();
+    std::cout << "\n\n\n";
+    parser.parseBoolExpr();
     parser.nextSym();
     std::cout << "\n\n\n\n";
-    parser.statement();
-    parser.statement();
+    parser.parseStatement();
+    parser.parseStatement();
 }

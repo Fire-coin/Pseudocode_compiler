@@ -12,3 +12,5 @@ CMakeCache.txt
 *.a
 *.lib
 *.pdb
+run
+run.sh

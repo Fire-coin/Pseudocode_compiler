@@ -1,6 +1,18 @@
 #include "AST.hpp"
 
+void visitor::bool_expr(){}
+void visitor::bin_expr(){}
+void visitor::lit_expr(){}
+void visitor::var_expr(){}
+void visitor::decl_stmt(){}
+
+
 visitor vis;
+
+void ASTNode::visitor() {}
+
+void expr::visitor() {}
+void stmt::visitor() {}
 
 void bool_expr::visitor() {
     vis.bool_expr();

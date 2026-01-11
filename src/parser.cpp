@@ -12,7 +12,7 @@ Parser::Parser(std::vector<Token> arr): tokens(arr), index(0) {
 int is_dtype(std::string type) {
     std::cout << "Is_dtype called\n";
     for (int i = 0; i < dtypes.size(); ++i) {
-        std::cout << dtypes[i] << std::endl;
+        //std::cout << dtypes[i] << std::endl;
         if (type == dtypes[i])
             return 1;
     }
@@ -156,42 +156,71 @@ std::unique_ptr<expr> Parser::parseFactor() {
         expect(rparen);
         return p;
     } else {
-        std::cout << "Factor: syntax error\n";
+	std::unique_ptr<expr> p = nullptr;
+	std::cout << "Factor: syntax error\n";
         std::cout << sym << std::endl;
         nextSym();
+	return p; 
     }
 }
 
-std::unique_ptr<expr> Parser::term() {
-    std::cout << "term called\n";
+std::unique_ptr<expr> Parser::parseTerm() {
+    std::cout << "parseTerm called\n";
     std::unique_ptr<expr> p1 = parseFactor();
     if (sym != star && sym != slash)
         return p1;
-    
+	
     std::unique_ptr<bin_expr> root = std::make_unique<bin_expr>();
     root->op = tokens[index - 1].tokenValue;
+    root->left = std::move(p1);
+    bin_expr* current = root.get(); // Pointing raw pointer to the content of unique pointer
+
     nextSym();
     std::unique_ptr<expr> p2 = parseFactor();
-
-    root->left = std::move(p1);
-    root->right = std::move(p2);
+    
     /* TODO finish the binary node */
     while (sym == star || sym == slash) {
-        nextSym();
-        p1 = parseFactor();
+        current->right = std::make_unique<bin_expr>();
+	current = (bin_expr*)current->right.get();
+	current->op = tokens[index - 1].tokenValue;
+	current->left = std::move(p2);
+	
+	nextSym();
+        p2 = parseFactor();
 
     }
-}
+    current->right = std::move(p2);
+    //delete current;
 
+    return root;
+}
+/* TODO: Add unary operator support */
 std::unique_ptr<expr> Parser::parseExpr() {
     std::cout << "expr called\n";
     if (sym == plus || sym == minus)
         nextSym();
-    term();
+    std::unique_ptr<expr> p1 = parseTerm();
+    if (sym != plus && sym != minus)
+	return p1;
+    std::unique_ptr<bin_expr> root = std::make_unique<bin_expr>();
+    root->left = std::move(p1);
+    root->op = tokens[index - 1].tokenValue;
+    bin_expr* current = root.get(); // Pointing raw pointer to the content of unique pointer
+    
+    nextSym();
+    std::unique_ptr<expr> p2 = parseTerm();
+
     while (sym == plus || sym == minus) {
-        nextSym();
-        term();
+   	current->right = std::make_unique<bin_expr>();
+	current = (bin_expr*)current->right.get();
+	current->left = std::move(p2);
+	current->op = tokens[index - 1].tokenValue;
+
+	nextSym();
+        p2 = parseTerm();
     }
+    current->right = std::move(p2);
+    return root;
 }
 
 /* TODO: Fix this
